@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Speed Typer - Kata Acak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF69B4',
+                        secondary: '#FFC0CB',
+                        light: '#FFFFFF',
+                        darkPink: '#DB2777',
+                        correct: '#4ADE80',
+                        wrong: '#F87171',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        shake: 'shake 0.3s ease-in-out',
+                        flashGreen: 'flashGreen 0.4s ease-in-out',
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-8px)' },
+                            '75%': { transform: 'translateX(8px)' },
+                        },
+                        flashGreen: {
+                            '0%': { backgroundColor: '#BBF7D0' },
+                            '100%': { backgroundColor: 'transparent' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(219, 39, 119, 0.3);
+            }
+            .bg-gradient-pink {
+                background: linear-gradient(135deg, #FF69B4 0%, #FFC0CB 100%);
+            }
+            .shake {
+                animation: shake 0.3s ease-in-out;
+            }
+            .flash-green {
+                animation: flashGreen 0.4s ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body class="bg-secondary/20 font-sans min-h-screen flex flex-col transition-all duration-300">
+    <!-- Header -->
+    <header class="bg-light shadow-md py-5 px-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa fa-keyboard-o text-primary text-[28px]"></i>
+                <h1 class="text-[24px] font-bold text-primary text-shadow">The Speed Typer ⌨️⚡</h1>
+            </div>
+            <p class="text-darkPink font-medium">Ketikan kata secepat mungkin!</p>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto flex-grow py-10 px-4 max-w-xl flex flex-col items-center justify-center">
+        <!-- Info Permainan -->
+        <div class="bg-light rounded-xl shadow-lg p-6 mb-8 w-full text-center">
+            <div class="flex justify-center gap-12">
+                <div>
+                    <p class="text-darkPink font-semibold">Skor</p>
+                    <p id="score" class="text-[32px] font-bold text-primary">0</p>
+                </div>
+                <div>
+                    <p class="text-darkPink font-semibold">Waktu</p>
+                    <p id="timer" class="text-[32px] font-bold text-primary">60</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kata Target -->
+        <div id="word-container" class="bg-light rounded-xl shadow-lg p-10 mb-6 w-full text-center transition-all">
+            <p class="text-gray-600 text-sm mb-2">Kata yang harus diketik:</p>
+            <h2 id="target-word" class="text-[48px] font-bold text-primary tracking-wider">SIAP?</h2>
+        </div>
+
+        <!-- Input Pengguna -->
+        <input 
+            type="text" 
+            id="user-input" 
+            class="w-full p-4 rounded-lg border-2 border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 text-[24px] text-center font-medium"
+            placeholder="Ketik di sini..."
+            autocomplete="off"
+        >
+
+        <!-- Tombol Mulai -->
+        <button id="start-btn" class="mt-8 bg-gradient-pink hover:bg-primary/90 text-white font-semibold py-3 px-10 rounded-full transition-all transform hover:scale-105 shadow-md text-lg">
+            Mulai Permainan 🚀
+        </button>
+
+        <!-- Hasil Akhir -->
+        <div id="result" class="hidden mt-10 bg-light rounded-xl shadow-lg p-8 text-center w-full">
+            <h2 class="text-[28px] font-bold text-primary mb-3">Permainan Selesai! 🎉</h2>
+            <p id="final-score" class="text-xl text-gray-700"></p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-8 shadow-inner">
+        <div class="container mx-auto text-center text-primary font-medium">
+            <p>© 2025 The Speed Typer - Latihan Mengetik Menyenangkan 💖</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Elemen DOM
+        const targetWordEl = document.getElementById('target-word');
+        const userInputEl = document.getElementById('user-input');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const wordContainerEl = document.getElementById('word-container');
+        const startBtn = document.getElementById('start-btn');
+        const resultEl = document.getElementById('result');
+        const finalScoreEl = document.getElementById('final-score');
+        const bodyEl = document.body;
+
+        // Daftar kata acak
+        const wordList = [
+            "KOMPUTER", "JARI", "LAYAR", "KETIK", "CEPAT", "AKURAT", "GAMBAR", "WARNA", 
+            "PINK", "PUTIH", "LATIHAN", "SKOR", "WAKTU", "HURUF", "KATA", "BARIS", 
+            "LAYANAN", "DUNIA", "DIGITAL", "KETERAMPILAN", "SEKOLAH", "BELAJAR", 
+            "MENYENANGKAN", "TEKNOLOGI", "INTERNET", "DATA", "INFORMASI", "PAPAN", 
+            "TULIS", "LINGKARAN", "SEGITIGA", "PERMAINAN", "SERU", "CANGGIH", "MUDAH"
+        ];
+
+        // Variabel Permainan
+        let score = 0;
+        let timeLeft = 60;
+        let isPlaying = false;
+        let currentWord = "";
+        let timer;
+
+        // Fungsi mendapatkan kata acak
+        function getRandomWord() {
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            return wordList[randomIndex];
+        }
+
+        // Tampilkan kata baru
+        function showNewWord() {
+            currentWord = getRandomWord();
+            targetWordEl.innerText = currentWord;
+        }
+
+        // Efek jika benar: ubah latar hijau sekejap
+        function correctEffect() {
+            bodyEl.classList.add('flash-green');
+            setTimeout(() => {
+                bodyEl.classList.remove('flash-green');
+            }, 400);
+        }
+
+        // Efek jika salah: layar bergetar
+        function wrongEffect() {
+            wordContainerEl.classList.add('shake');
+            setTimeout(() => {
+                wordContainerEl.classList.remove('shake');
+            }, 300);
+        }
+
+        // Mulai Permainan
+        startBtn.addEventListener('click', () => {
+            if (isPlaying) return;
+
+            // Reset nilai
+            score = 0;
+            timeLeft = 60;
+            isPlaying = true;
+            scoreEl.innerText = score;
+            timerEl.innerText = timeLeft;
+            resultEl.classList.add('hidden');
+            userInputEl.value = '';
+            userInputEl.disabled = false;
+            userInputEl.focus();
+            startBtn.classList.add('hidden');
+
+            // Tampilkan kata pertama
+            showNewWord();
+
+            // Mulai hitung mundur
+            timer = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        });
+
+        // Cek input pengguna
+        userInputEl.addEventListener('input', () => {
+            if (!isPlaying) return;
+
+            const inputValue = userInputEl.value.toUpperCase();
+
+            // Jika ketikan sama persis dengan kata target
+            if (inputValue === currentWord) {
+                score++;
+                scoreEl.innerText = score;
+                correctEffect(); // Efek benar
+                userInputEl.value = ''; // Kosongkan input
+                showNewWord(); // Munculkan kata baru
+            } 
+            // Jika ketikan tidak sama dan panjangnya sudah sama (artinya salah)
+            else if (inputValue.length === currentWord.length) {
+                wrongEffect(); // Efek salah
+                userInputEl.value = ''; // Reset input untuk coba lagi
+            }
+        });
+
+        // Akhiri Permainan
+        function endGame() {
+            clearInterval(timer);
+            isPlaying = false;
+            userInputEl.disabled = true;
+            startBtn.classList.remove('hidden');
+            startBtn.innerText = "Main Lagi 🔄";
+            
+            // Tampilkan hasil
+            finalScoreEl.innerText = `Skor akhir kamu: ${score} poin. ${score > 20 ? 'Luar biasa! Kecepatanmu hebat! 🔥' : 'Bagus sekali, terus latihan ya! 💪'}`;
+            resultEl.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
