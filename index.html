@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Speed Typer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
+            color: white;
+            transition: background-color 0.2s ease;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+        }
+
+        #word-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        input {
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: none;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            outline: none;
+        }
+
+        .score-board {
+            margin-top: 20px;
+            font-size: 1.5rem;
+        }
+
+        /* Efek Bergetar (Shake) */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.2s ease-in-out;
+        }
+
+        .correct-bg {
+            background-color: #27ae60 !important;
+        }
+    </style>
+</head>
+<body id="body">
+
+    <div class="container" id="game-container">
+        <h1>The Speed Typer</h1>
+        <div id="word-display">LOADING...</div>
+        
+        <input type="text" id="input-word" placeholder="Ketik di sini..." autofocus autocomplete="off">
+        
+        <div class="score-board">
+            Skor: <span id="score">0</span>
+        </div>
+    </div>
+
+    <script>
+        const words = ['Makan', 'Lari', 'Pintar', 'Sekolah', 'Belajar', 'Bantaeng', 'Lontara', 'Budaya', 'Sejarah', 'Digital', 'Smartphone', 'Kreatif', 'Fokus', 'Cepat', 'Hebat'];
+        
+        let currentWord;
+        let score = 0;
+
+        const wordDisplay = document.getElementById('word-display');
+        const inputWord = document.getElementById('input-word');
+        const scoreDisplay = document.getElementById('score');
+        const body = document.getElementById('body');
+        const container = document.getElementById('game-container');
+
+        // Fungsi memilih kata acak
+        function showNewWord() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex];
+            wordDisplay.innerText = currentWord;
+        }
+
+        // Cek ketikan setiap ada input
+        inputWord.addEventListener('input', () => {
+            const typedText = inputWord.value;
+
+            if (typedText === currentWord) {
+                // Jika Benar
+                score++;
+                scoreDisplay.innerText = score;
+                inputWord.value = '';
+                
+                // Efek Hijau
+                body.classList.add('correct-bg');
+                setTimeout(() => body.classList.remove('correct-bg'), 200);
+                
+                showNewWord();
+            } else if (typedText.length >= currentWord.length && typedText !== currentWord) {
+                // Jika Salah (setelah panjang kata terpenuhi)
+                container.classList.add('shake');
+                setTimeout(() => container.classList.remove('shake'), 200);
+                inputWord.value = '';
+            }
+        });
+
+        // Mulai game pertama kali
+        showNewWord();
+    </script>
+</body>
+</html>
